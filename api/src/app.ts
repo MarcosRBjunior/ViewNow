@@ -3,12 +3,17 @@ import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middlewares/errorHandler.js';
-import { routes } from './routes/index.js';
+import { requestLogger } from './middlewares/requestLogger.js';
+import { createVideosRepository } from './repositories/videos.repository.js';
+import { createRoutes, type RoutesDeps } from './routes/index.js';
+import { runSync } from './services/sync.service.js';
 
-export function createApp() {
+export function createApp(deps: Partial<RoutesDeps> = {}) {
   const app = express();
 
   app.disable('x-powered-by');
+  app.set('trust proxy', true);
+  app.use(requestLogger);
   app.use(helmet());
   app.use(cors({ origin: env.CORS_ORIGIN, methods: ['GET', 'POST'] }));
   app.use(express.json({ limit: '10kb' }));
@@ -17,7 +22,14 @@ export function createApp() {
     res.json({ name: 'ViewNow API', docs: '/api/health' });
   });
 
-  app.use('/api', routes);
+  app.use(
+    '/api',
+    createRoutes({
+      repository: deps.repository ?? createVideosRepository(),
+      runSync: deps.runSync ?? ((trigger) => runSync(trigger)),
+      cronSecret: deps.cronSecret ?? env.CRON_SECRET,
+    }),
+  );
 
   app.use(notFound);
   app.use(errorHandler);

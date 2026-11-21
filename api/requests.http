@@ -1,0 +1,33 @@
+# Coleção de requisições da ViewNow API (extensão REST Client do VS Code ou JetBrains HTTP Client).
+# Defina cronSecret localmente; nunca versione o valor real.
+@baseUrl = http://localhost:3333/api
+@cronSecret = cole-o-CRON_SECRET-aqui
+
+### Health
+GET {{baseUrl}}/health
+
+### Listar vídeos (paginação padrão: page=1, limit=12)
+GET {{baseUrl}}/videos
+
+### Listar com paginação e busca
+GET {{baseUrl}}/videos?page=1&limit=6&search=opening
+
+### Um vídeo (uuid interno ou youtube_id)
+GET {{baseUrl}}/videos/jIfogFtgV-o
+
+### Dados de incorporação
+GET {{baseUrl}}/videos/jIfogFtgV-o/embed
+
+### Validação: limit acima de 50 → 400
+GET {{baseUrl}}/videos?limit=99
+
+### Sync manual
+POST {{baseUrl}}/sync
+Authorization: Bearer {{cronSecret}}
+
+### Sync do cron (mesma operação; a Vercel Cron chama com GET)
+GET {{baseUrl}}/cron/sync
+Authorization: Bearer {{cronSecret}}
+
+### Sync sem secret → 401
+POST {{baseUrl}}/sync

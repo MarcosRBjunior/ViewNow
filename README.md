@@ -10,7 +10,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 2 — banco no Supabase e sincronização**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 3 — API REST**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -44,6 +44,19 @@ Teste rápido: `curl http://localhost:3333/api/health`.
 | `api/` | `npm run lint` / `npm run typecheck` | Qualidade |
 | `web/` | `npm run dev` / `npm run build` | Next.js |
 | `web/` | `npm run lint` / `npm run typecheck` | Qualidade |
+
+## Rotas da API
+
+Base: `/api`. Erros sempre no formato `{ "error": { "code", "message" } }`. Coleção pronta em [`api/requests.http`](./api/requests.http).
+
+| Método | Rota | Descrição | Auth |
+| --- | --- | --- | --- |
+| GET | `/videos?page&limit&search` | Lista paginada (limit 1–50, padrão 12), só vídeos visíveis, ordenada pela playlist | — |
+| GET | `/videos/:id` | Um vídeo por uuid ou `youtube_id`; 404 se não existir ou estiver oculto | — |
+| GET | `/videos/:id/embed` | `youtubeId` e `embedUrl` com `autoplay=1` | — |
+| POST | `/sync` | Sincronização manual | `Bearer CRON_SECRET` |
+| GET | `/cron/sync` | Sincronização diária (Vercel Cron, 06:00 UTC) | `Bearer CRON_SECRET` |
+| GET | `/health` | Status da API e do banco | — |
 
 ## Documentação
 
