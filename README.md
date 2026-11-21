@@ -10,7 +10,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 1 — integração com o YouTube**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 2 — banco no Supabase e sincronização**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -39,6 +39,8 @@ Teste rápido: `curl http://localhost:3333/api/health`.
 | `api/` | `npm run dev` | Servidor com reload (`tsx watch`) |
 | `api/` | `npm test` | Testes (Vitest + supertest) |
 | `api/` | `npm run youtube:preview [-- 10]` | Lista no terminal os vídeos que a sync gravaria (precisa de `YOUTUBE_API_KEY`) |
+| `api/` | `npm run sync` | Sincroniza a playlist com o banco (YouTube → `public.videos`, log em `internal.sync_runs`) |
+| `api/` | `npm run db:types` | Regera `src/lib/database.types.ts` a partir do banco ligado |
 | `api/` | `npm run lint` / `npm run typecheck` | Qualidade |
 | `web/` | `npm run dev` / `npm run build` | Next.js |
 | `web/` | `npm run lint` / `npm run typecheck` | Qualidade |
@@ -48,3 +50,13 @@ Teste rápido: `curl http://localhost:3333/api/health`.
 - [Especificação](./docs/specs.md)
 - [Arquitetura](./docs/architecture.md)
 - [System design](./docs/system-design.md)
+
+## Banco de dados (Supabase)
+
+```bash
+npx supabase login                      # uma vez, num terminal interativo
+npx supabase link --project-ref <ref>   # liga a pasta supabase/ ao projeto
+npx supabase db push --remote           # aplica as migrations de supabase/migrations
+```
+
+Segurança aplicada na migration inicial: RLS em todas as tabelas com políticas que negam `anon` e `authenticated`, log de sincronização no schema `internal` (fora da API pública) e função `log_sync_run` com `SECURITY DEFINER`, `search_path` fixo e execução restrita à `service_role`.
