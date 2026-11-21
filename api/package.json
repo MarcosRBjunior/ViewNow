@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "youtube:preview": "tsx src/scripts/youtube-preview.ts"
   },
   "type": "module",
   "private": true,

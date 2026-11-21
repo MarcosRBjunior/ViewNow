@@ -22,6 +22,8 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
 
-  console.error(JSON.stringify({ level: 'error', message: String(err?.message ?? err), stack: err?.stack }));
+  console.error(
+    JSON.stringify({ level: 'error', message: String(err?.message ?? err), stack: err?.stack }),
+  );
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor' } });
 };

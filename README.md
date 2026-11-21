@@ -10,7 +10,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 0 — setup**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 1 — integração com o YouTube**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -38,6 +38,7 @@ Teste rápido: `curl http://localhost:3333/api/health`.
 | --- | --- | --- |
 | `api/` | `npm run dev` | Servidor com reload (`tsx watch`) |
 | `api/` | `npm test` | Testes (Vitest + supertest) |
+| `api/` | `npm run youtube:preview [-- 10]` | Lista no terminal os vídeos que a sync gravaria (precisa de `YOUTUBE_API_KEY`) |
 | `api/` | `npm run lint` / `npm run typecheck` | Qualidade |
 | `web/` | `npm run dev` / `npm run build` | Next.js |
 | `web/` | `npm run lint` / `npm run typecheck` | Qualidade |

@@ -1,0 +1,28 @@
+{
+  "kind": "youtube#playlistItemListResponse",
+  "pageInfo": { "totalResults": 9, "resultsPerPage": 50 },
+  "items": [
+    {
+      "id": "item-8",
+      "snippet": {
+        "title": "Ending 2",
+        "description": "Encerramento.",
+        "position": 7,
+        "thumbnails": { "high": { "url": "https://i.ytimg.com/vi/video000008/hqdefault.jpg" } },
+        "videoOwnerChannelTitle": "Canal Oficial"
+      },
+      "contentDetails": { "videoId": "video000008", "videoPublishedAt": "2016-03-05T10:00:00Z" },
+      "status": { "privacyStatus": "public" }
+    },
+    {
+      "id": "item-9",
+      "snippet": {
+        "title": "Ending 2 (piano)",
+        "position": 8,
+        "thumbnails": { "high": { "url": "https://i.ytimg.com/vi/video000009/hqdefault.jpg" } }
+      },
+      "contentDetails": { "videoId": "video000009", "videoPublishedAt": "2017-07-07T07:00:00Z" },
+      "status": { "privacyStatus": "public" }
+    }
+  ]
+}

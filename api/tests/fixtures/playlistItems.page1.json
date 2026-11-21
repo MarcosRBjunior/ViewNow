@@ -1,0 +1,90 @@
+{
+  "kind": "youtube#playlistItemListResponse",
+  "nextPageToken": "PAGE_2",
+  "pageInfo": { "totalResults": 9, "resultsPerPage": 50 },
+  "items": [
+    {
+      "id": "item-1",
+      "snippet": {
+        "title": "Opening 2 (completo)",
+        "description": "Abertura oficial.",
+        "position": 0,
+        "thumbnails": {
+          "default": { "url": "https://i.ytimg.com/vi/video000001/default.jpg" },
+          "medium": { "url": "https://i.ytimg.com/vi/video000001/mqdefault.jpg" },
+          "high": { "url": "https://i.ytimg.com/vi/video000001/hqdefault.jpg" }
+        },
+        "videoOwnerChannelTitle": "Canal Oficial"
+      },
+      "contentDetails": { "videoId": "video000001", "videoPublishedAt": "2015-10-03T12:00:00Z" },
+      "status": { "privacyStatus": "public" }
+    },
+    {
+      "id": "item-2",
+      "snippet": {
+        "title": "Private video",
+        "description": "This video is private.",
+        "position": 1,
+        "thumbnails": {}
+      },
+      "contentDetails": { "videoId": "video000002" },
+      "status": { "privacyStatus": "private" }
+    },
+    {
+      "id": "item-3",
+      "snippet": {
+        "title": "  Opening 2 (TV size)  ",
+        "position": 2,
+        "thumbnails": { "medium": { "url": "https://i.ytimg.com/vi/video000003/mqdefault.jpg" } },
+        "videoOwnerChannelTitle": "Outro Canal"
+      },
+      "contentDetails": { "videoId": "video000003", "videoPublishedAt": "2016-01-10T08:30:00Z" },
+      "status": { "privacyStatus": "public" }
+    },
+    {
+      "id": "item-4",
+      "snippet": {
+        "title": "Clipe com incorporação bloqueada",
+        "description": "",
+        "position": 3,
+        "thumbnails": { "high": { "url": "https://i.ytimg.com/vi/video000004/hqdefault.jpg" } },
+        "videoOwnerChannelTitle": "Gravadora"
+      },
+      "contentDetails": { "videoId": "video000004", "videoPublishedAt": "2016-02-01T00:00:00Z" },
+      "status": { "privacyStatus": "public" }
+    },
+    {
+      "id": "item-5",
+      "snippet": {
+        "title": "Opening 2 (completo)",
+        "position": 4,
+        "thumbnails": { "high": { "url": "https://i.ytimg.com/vi/video000001/hqdefault.jpg" } },
+        "videoOwnerChannelTitle": "Canal Oficial"
+      },
+      "contentDetails": { "videoId": "video000001", "videoPublishedAt": "2015-10-03T12:00:00Z" },
+      "status": { "privacyStatus": "public" }
+    },
+    {
+      "id": "item-6",
+      "snippet": {
+        "title": "Deleted video",
+        "description": "This video is unavailable.",
+        "position": 5,
+        "thumbnails": {}
+      },
+      "contentDetails": { "videoId": "video000006" },
+      "status": { "privacyStatus": "privacyStatusUnspecified" }
+    },
+    {
+      "id": "item-7",
+      "snippet": {
+        "title": "Vídeo removido depois",
+        "position": 6,
+        "thumbnails": { "default": { "url": "https://i.ytimg.com/vi/video000007/default.jpg" } },
+        "videoOwnerChannelTitle": "Canal X"
+      },
+      "contentDetails": { "videoId": "video000007" },
+      "status": { "privacyStatus": "public" }
+    }
+  ]
+}
