@@ -8,9 +8,9 @@ Documentos relacionados: [specs.md](./specs.md) · [architecture.md](./architect
 | --- | --- | --- |
 | Volume de dados | ≤ 50 vídeos (padrão 20), 1 playlist | Sem necessidade de índices de busca avançados ou cache distribuído |
 | Escrita | 1 sync/dia (+ manuais) | Upsert em lote simples; sem filas |
-| Leitura | Baixa a moderada (portfólio), picos ao divulgar | ISR no front absorve picos; a API recebe poucas requisições |
+| Leitura | Baixa a moderada (portfólio), picos ao divulgar | Cache do Next absorve picos; a API recebe poucas requisições |
 | Cota externa | 10.000 unidades/dia no YouTube | Nunca chamar o YouTube no caminho de leitura |
-| Consistência | Eventual (até 24 h + 5 min de ISR) | Aceitável: a playlist muda raramente |
+| Consistência | Eventual (até 24 h + 5 min de cache) | Aceitável: a playlist muda raramente |
 
 ## 2. Modelo de dados
 
@@ -213,15 +213,15 @@ Header obrigatório `Authorization: Bearer <CRON_SECRET>` → `401 UNAUTHORIZED`
 
 ```mermaid
 flowchart LR
-    B[Navegador] --> EDGE[CDN Vercel<br/>HTML ISR 300 s]
+    B[Navegador] --> EDGE[CDN Vercel<br/>shell estático + cache 300 s]
     EDGE -->|miss / revalidação| RSC[Next.js server]
-    RSC -->|fetch revalidate 300| API[Express]
+    RSC -->|use cache · cacheLife 300 s| API[Express]
     API -->|Cache-Control: s-maxage=60,<br/>stale-while-revalidate=300| SB[(Supabase)]
 ```
 
 | Camada | Estratégia |
 | --- | --- |
-| Páginas Next | `fetch(..., { next: { revalidate: 300 } })`; `/` vira dinâmica quando há `?search` |
+| Páginas Next | Cache Components (Next 16): funções de `services/api.ts` com `'use cache'` + `cacheLife({ revalidate: 300 })`; a busca (`?search`) é dinâmica e renderiza em streaming dentro de `<Suspense>` |
 | API | `Cache-Control: public, s-maxage=60, stale-while-revalidate=300` nas rotas GET de vídeos; `no-store` em sync e health |
 | Imagens | `next/image` com `i.ytimg.com` em `remotePatterns`; `sizes` corretos no grid; `priority` só no hero |
 | Fonte | `next/font` (self-hosted, `display: swap`) |
@@ -255,7 +255,7 @@ Latência esperada: ~50–150 ms por consulta ao Supabase (mesma região da fun�
 | Falha | Comportamento |
 | --- | --- |
 | YouTube fora / cota estourada | Sync falha e é registrada; site segue servindo o último estado do banco |
-| Supabase fora | API devolve 503; páginas ISR continuam servindo o último HTML gerado (stale) até o banco voltar |
+| Supabase fora | API devolve 503; páginas em cache continuam servindo o último HTML gerado (stale) até o banco voltar |
 | API fora | Páginas em cache continuam no ar; navegação nova cai em `error.tsx` com "Tentar de novo" |
 | Vídeo não incorporável não detectado | Player emite erro 101/150 → `EmbedBlockedNotice` com link para o YouTube; mantenedor marca `visible = false` |
 | Cron não executa | Dados ficam até 1 dia defasados; `POST /api/sync` manual resolve |

@@ -1,0 +1,110 @@
+/* Tokens de design (referência: StreamVibe, tema escuro com acento vermelho) */
+:root {
+  color-scheme: dark;
+
+  /* Neutros */
+  --black-06: #0f0f0f;
+  --black-08: #141414;
+  --black-10: #1a1a1a;
+  --black-12: #1f1f1f;
+  --black-15: #262626;
+  --black-20: #333333;
+
+  /* Acento */
+  --red-45: #e50000;
+  --red-55: #ff1919;
+  --red-45-glow: rgba(229, 0, 0, 0.14);
+
+  /* Texto */
+  --white: #ffffff;
+  --grey-75: #bfbfbf;
+  --grey-60: #999999;
+
+  /* Tipografia */
+  --font-sans: var(--font-manrope), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-display: clamp(28px, 3.02vw, 58px);
+  --fs-h1: clamp(28px, 2.5vw, 48px);
+  --fs-h2: clamp(24px, 1.98vw, 38px);
+  --fs-h3: clamp(18px, 1.25vw, 24px);
+  --fs-title: clamp(16px, 1.04vw, 20px);
+  --fs-body-l: clamp(14px, 0.94vw, 18px);
+  --fs-label: clamp(14px, 0.94vw, 18px);
+  --fs-body-s: clamp(12px, 0.83vw, 16px);
+  --fs-caption: 14px;
+
+  /* Layout */
+  --container: 1596px;
+  --gutter: clamp(16px, 5vw, 80px);
+  --gap-grid: 30px;
+  --gap-card: 20px;
+  --section-gap: clamp(64px, 7.8vw, 150px);
+
+  /* Raios */
+  --radius-badge: 4px;
+  --radius-chip: 6px;
+  --radius-control: 8px;
+  --radius-thumb: 10px;
+  --radius-card: 12px;
+  --radius-pill: 51px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--black-08);
+  color: var(--white);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-l);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+iframe {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red-55);
+  outline-offset: 3px;
+}
+
+.container {
+  width: 100%;
+  max-width: calc(var(--container) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

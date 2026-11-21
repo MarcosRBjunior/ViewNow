@@ -7,7 +7,7 @@
 | --- | --- |
 | Status | Em especificação (Etapa 0) |
 | Repositório | `github.com/MarcosRBjunior/ViewNow` |
-| Stack | TypeScript · Express (API) · Next.js App Router (web) · PostgreSQL no Supabase · Vercel |
+| Stack | TypeScript · Express (API) · Next.js 16 App Router (web) · PostgreSQL no Supabase · Vercel |
 | Referência visual | Design "StreamVibe" (tema escuro, Manrope, acento vermelho) — arquivo local, não versionado |
 | Playlist | `PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu` |
 
@@ -112,7 +112,7 @@ Erro padrão em todas as rotas: `{ "error": { "code": "NOT_FOUND", "message": ".
 | --- | --- | --- |
 | RNF-01 | Segurança Supabase | Os 7 requisitos (RLS em tudo, secret key só no back, funções `SECURITY DEFINER` com `search_path` fixo, Auth blindado, Storage sem buckets, schema `internal`, Security Advisor sem avisos) |
 | RNF-02 | Segredos | Nenhuma chave do Supabase ou do YouTube no `web/`; nada sensível com prefixo `NEXT_PUBLIC_`; `.env*` fora do git |
-| RNF-03 | Desempenho | LCP < 2,5 s na home (Vercel, 4G); páginas com ISR (`revalidate: 300`); `next/image` para miniaturas |
+| RNF-03 | Desempenho | LCP < 2,5 s na home (Vercel, 4G); dados com `'use cache'` + `cacheLife` (5 min); `next/image` para miniaturas |
 | RNF-04 | Cota do YouTube | Uma sync ≤ 5 unidades (cota padrão: 10.000/dia) |
 | RNF-05 | Acessibilidade | WCAG 2.1 AA: contraste (paleta já validada), `alt` nas miniaturas, navegação por teclado, foco visível |
 | RNF-06 | Responsividade | 360 px a 1920 px; tipografia com `clamp()` conforme o design |

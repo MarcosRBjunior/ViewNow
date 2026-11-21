@@ -1,0 +1,19 @@
+.hero {
+  display: grid;
+  gap: 14px;
+  padding-block: clamp(64px, 10vw, 200px);
+  text-align: center;
+  justify-items: center;
+}
+
+.title {
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text {
+  max-width: 64ch;
+  color: var(--grey-60);
+  font-size: var(--fs-body-l);
+}

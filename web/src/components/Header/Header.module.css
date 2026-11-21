@@ -1,0 +1,56 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(20, 20, 20, 0.95), rgba(20, 20, 20, 0.75));
+  backdrop-filter: blur(8px);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: clamp(72px, 6.8vw, 130px);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.logoMark {
+  width: clamp(32px, 2.6vw, 50px);
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, var(--red-55), var(--red-45));
+  clip-path: polygon(22% 12%, 22% 88%, 88% 50%);
+}
+
+.menu {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  list-style: none;
+  border: 3px solid var(--black-12);
+  border-radius: var(--radius-card);
+  background: var(--black-06);
+}
+
+.menuItem {
+  display: block;
+  padding: 10px clamp(14px, 1.25vw, 24px);
+  border-radius: var(--radius-control);
+  color: var(--grey-75);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.menuItem:hover {
+  color: var(--white);
+  background: var(--black-10);
+}

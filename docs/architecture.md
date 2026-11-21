@@ -11,7 +11,7 @@ flowchart LR
     U([Visitante]) -->|HTTPS| WEB
 
     subgraph Vercel
-        WEB["web/ · Next.js App Router<br/>Server Components + ISR"]
+        WEB["web/ · Next.js 16 App Router<br/>Server Components + Cache Components"]
         API["api/ · Express<br/>(1 Vercel Function)"]
         CRON[[Vercel Cron<br/>06:00 UTC]]
     end
@@ -127,9 +127,9 @@ flowchart TB
 
 | Rota | Tipo de renderização | Dados | Componentes principais |
 | --- | --- | --- | --- |
-| `/` | Server Component, ISR 300 s (dinâmico quando há `?search`) | `getVideos({ page, limit, search })` | `Hero`, `VideoGallery`, `VideoCard`, `Pagination` |
-| `/playlist` | Server Component, ISR 300 s | `getVideos({ limit: 50 })` | `PlaylistPlayer` (iframe), `VideoList` |
-| `/video/[youtubeId]` | Server Component, ISR 300 s + `generateMetadata` | `getVideo(id)` + `getVideos()` | `VideoPlayer` (client), `InfoCard`, `VideoList` |
+| `/` | Server Component; dados com `'use cache'` + `cacheLife` (5 min); busca em streaming dentro de `<Suspense>` | `getVideos({ page, limit, search })` | `Hero`, `VideoGallery`, `VideoCard`, `Pagination` |
+| `/playlist` | Server Component, `'use cache'` + `cacheLife` (5 min) | `getVideos({ limit: 50 })` | `PlaylistPlayer` (iframe), `VideoList` |
+| `/video/[youtubeId]` | Server Component, `'use cache'` + `cacheLife` (5 min) + `generateMetadata` | `getVideo(id)` + `getVideos()` | `VideoPlayer` (client), `InfoCard`, `VideoList` |
 
 - **Server vs Client**: tudo é Server Component, exceto `VideoPlayer` (react-youtube precisa do navegador), `SearchInput` (debounce + `router.replace`) e `Pagination` "carregar mais" se for incremental.
 - O Server Component calcula `nextId` e passa como prop para o `VideoPlayer` (funções não atravessam a fronteira Server → Client).
@@ -165,7 +165,7 @@ flowchart LR
 | ADR-02 | Express como uma única Vercel Function | Fastify, Hono, servidor em Railway/Render | Suporte zero-config da Vercel; um único provedor; Express é o que o briefing espera de Node |
 | ADR-03 | Sync para o banco + leitura sempre do banco | Chamar o YouTube a cada request | Protege a cota, permite curadoria, desacopla disponibilidade do YouTube |
 | ADR-04 | Supabase acessado só com secret key no back, RLS negando tudo | Front lendo com publishable key + RLS de leitura | Superfície mínima: nenhuma chave no navegador |
-| ADR-05 | ISR (`revalidate: 300`) em vez de revalidação sob demanda | Webhook de revalidação | Revalidação sob demanda exigiria Route Handler no Next (fere ADR-01); dados mudam 1x/dia |
+| ADR-05 | Cache por tempo (`'use cache'` + `cacheLife`, 5 min) em vez de revalidação sob demanda | Webhook de revalidação | Revalidação sob demanda exigiria Route Handler no Next (fere ADR-01); dados mudam 1x/dia |
 | ADR-06 | CSS Modules + tokens CSS | Tailwind, styled-components | Nativo no Next, zero dependência, tokens do StreamVibe mapeiam 1:1 para variáveis CSS |
 | ADR-07 | `react-youtube` isolado em um componente | iframe puro, `@vidstack` | Pedido pelo briefing; isolamento permite trocar por iframe sem afetar o resto |
 | ADR-08 | Sem monorepo tooling (Turborepo/workspaces) | Turborepo | Dois apps pequenos sem código compartilhado; menos configuração na Vercel |
