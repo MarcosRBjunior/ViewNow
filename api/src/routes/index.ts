@@ -1,7 +1,39 @@
 import { Router } from 'express';
-import { healthRoutes } from './health.routes.js';
+import { createSyncController, type RunSync } from '../controllers/sync.controller.js';
+import { createVideosController } from '../controllers/videos.controller.js';
+import { requireCronSecret } from '../middlewares/requireCronSecret.js';
+import type { VideosRepository } from '../repositories/videos.repository.js';
 
-export const routes = Router();
+export type RoutesDeps = {
+  repository: VideosRepository;
+  runSync: RunSync;
+  cronSecret: string;
+};
 
-routes.use('/health', healthRoutes);
-// Etapa 3: routes.use('/videos', videosRoutes); routes.use('/sync', syncRoutes); routes.use('/cron', cronRoutes);
+export function createRoutes({ repository, runSync, cronSecret }: RoutesDeps) {
+  const routes = Router();
+  const videos = createVideosController(repository);
+  const sync = createSyncController(runSync);
+  const auth = requireCronSecret(cronSecret);
+
+  routes.get('/health', async (_req, res) => {
+    const dbOk = await repository.ping();
+    res
+      .status(dbOk ? 200 : 503)
+      .set('Cache-Control', 'no-store')
+      .json({
+        status: dbOk ? 'ok' : 'degraded',
+        db: dbOk ? 'ok' : 'error',
+        time: new Date().toISOString(),
+      });
+  });
+
+  routes.get('/videos', videos.list);
+  routes.get('/videos/:id', videos.show);
+  routes.get('/videos/:id/embed', videos.embed);
+
+  routes.post('/sync', auth, sync.manual);
+  routes.get('/cron/sync', auth, sync.cron);
+
+  return routes;
+}
