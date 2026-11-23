@@ -43,3 +43,29 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # E2E com Playwright: build de produção do web apontando para a API mock (web/e2e/mock-api.mjs).
+  # Não usa Supabase nem a chave do YouTube, então roda igual em qualquer PR.
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: web/playwright-report/
+          retention-days: 7

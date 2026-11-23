@@ -8,6 +8,8 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   test: {
+    // e2e/ é do Playwright (npm run test:e2e).
+    include: ['tests/**/*.test.{ts,tsx}'],
     environment: 'jsdom',
     setupFiles: ['./tests/setup.tsx'],
     css: { modules: { classNameStrategy: 'non-scoped' } },
