@@ -10,7 +10,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 3 — API REST**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 4 — Galeria**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -43,6 +43,7 @@ Teste rápido: `curl http://localhost:3333/api/health`.
 | `api/` | `npm run db:types` | Regera `src/lib/database.types.ts` a partir do banco ligado |
 | `api/` | `npm run lint` / `npm run typecheck` | Qualidade |
 | `web/` | `npm run dev` / `npm run build` | Next.js |
+| `web/` | `npm test` | Testes de componente (Vitest + React Testing Library) |
 | `web/` | `npm run lint` / `npm run typecheck` | Qualidade |
 
 ## Rotas da API

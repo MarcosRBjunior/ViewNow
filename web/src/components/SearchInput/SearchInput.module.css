@@ -1,0 +1,91 @@
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.search[data-open] {
+  border-color: var(--black-15);
+  background: var(--black-06);
+}
+
+.search[data-pending] {
+  border-color: var(--black-20);
+}
+
+.input {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: var(--fs-body-l);
+  opacity: 0;
+  outline: none;
+  transition:
+    width 0.25s ease,
+    padding 0.25s ease,
+    opacity 0.2s;
+}
+
+.search[data-open] .input {
+  width: clamp(150px, 16vw, 280px);
+  padding-left: 14px;
+  opacity: 1;
+}
+
+.input::placeholder {
+  color: var(--grey-60);
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search:focus-within {
+  border-color: var(--grey-60);
+}
+
+/* O foco do campo aparece na borda do formulário, não num contorno extra por dentro. */
+.input:focus-visible {
+  outline: none;
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--red-55);
+}
+
+@media (max-width: 639px) {
+  /* No celular o campo aberto ocupa a linha inteira, abaixo do logo e do menu. */
+  .search[data-open] {
+    position: absolute;
+    top: calc(100% - 6px);
+    right: var(--gutter);
+    left: var(--gutter);
+    z-index: 1;
+  }
+
+  .search[data-open] .input {
+    flex: 1;
+    width: auto;
+  }
+}

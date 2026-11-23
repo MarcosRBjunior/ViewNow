@@ -1,0 +1,140 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(12px, 0.83vw, 16px);
+  border: 1px solid var(--black-15);
+  border-radius: var(--radius-card);
+  background: var(--black-10);
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.card:hover,
+.card:focus-within {
+  border-color: var(--black-20);
+  transform: translateY(-2px);
+}
+
+.link {
+  display: grid;
+  gap: 14px;
+  border-radius: var(--radius-thumb);
+}
+
+/* O link cobre o card inteiro; os chips continuam fora dele (texto, não ação). */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-thumb);
+  background: var(--black-12);
+}
+
+.image {
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+.noImage {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--grey-60);
+  font-size: var(--fs-body-s);
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 8px;
+  border-radius: var(--radius-badge);
+  background: var(--red-45);
+  color: var(--white);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 20, 20, 0.35);
+  color: var(--white);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.play svg {
+  box-sizing: content-box;
+  padding: 14px;
+  border-radius: 50%;
+  background: var(--red-45);
+}
+
+.card:hover .play,
+.link:focus-visible .play {
+  opacity: 1;
+}
+
+.title {
+  display: -webkit-box;
+  min-height: 3em;
+  overflow: hidden;
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--black-15);
+  border-radius: var(--radius-pill);
+  background: var(--black-08);
+  color: var(--grey-60);
+  font-size: var(--fs-body-s);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.chip svg {
+  flex-shrink: 0;
+}
+
+.chipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

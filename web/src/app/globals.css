@@ -61,6 +61,8 @@ html {
 }
 
 body {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   background: var(--black-08);
   color: var(--white);
@@ -68,6 +70,10 @@ body {
   font-size: var(--fs-body-l);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1;
 }
 
 a {
@@ -107,4 +113,13 @@ input {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
