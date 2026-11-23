@@ -10,7 +10,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 4 — Galeria**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 5 — Player**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -54,10 +54,10 @@ Três níveis, todos rodando no CI ([`.github/workflows/ci.yml`](./.github/workf
 | Nível | Ferramenta | O que cobre | Onde roda no CI |
 | --- | --- | --- | --- |
 | Unitário e de rota (API) | Vitest + supertest | Mapeamento e filtros do YouTube, sync, repositório e as 6 rotas com o banco mockado | job `api` (`npm test` em `api/`) |
-| Componente (web) | Vitest + React Testing Library | Cards, galeria e estados, paginação, busca com debounce, utilitários | job `web` (`npm test` em `web/`) |
-| E2E (web) | Playwright (Chromium) | A galeria no navegador: destaque e grade, busca digitando, busca vazia, paginação, API fora do ar com "Tentar de novo", layout em 390 px | job `e2e` (`npm run test:e2e` em `web/`) |
+| Componente (web) | Vitest + React Testing Library | Cards, galeria e estados, paginação, busca com debounce, player (autoplay, próximo vídeo, aviso de bloqueio), lista da seleção, utilitários | job `web` (`npm test` em `web/`) |
+| E2E (web) | Playwright (Chromium) | Galeria (destaque e grade, busca, busca vazia, paginação, API fora do ar, 390 px) e player (autoplay, próximo vídeo ao terminar, vídeo bloqueado, autoplay mudo, `/playlist`, 404, 390 px) | job `e2e` (`npm run test:e2e` em `web/`) |
 
-O E2E não depende do Supabase nem da chave do YouTube: o Playwright sobe uma API mock ([`web/e2e/mock-api.mjs`](./web/e2e/mock-api.mjs)) com o mesmo contrato da API real e 20 vídeos fixos em [`web/e2e/fixtures/videos.json`](./web/e2e/fixtures/videos.json), faz o build de produção do Next apontando para ela e roda os testes em série. Para simular a API fora do ar, o teste chama `POST /__e2e/state` no mock, que passa a responder 503.
+O E2E não depende do Supabase nem da chave do YouTube: o Playwright sobe uma API mock ([`web/e2e/mock-api.mjs`](./web/e2e/mock-api.mjs)) com o mesmo contrato da API real e 20 vídeos fixos em [`web/e2e/fixtures/videos.json`](./web/e2e/fixtures/videos.json), faz o build de produção do Next apontando para ela e roda os testes em série. O YouTube também é simulado: o teste injeta uma IFrame Player API falsa no lugar de `youtube.com/iframe_api` ([`web/e2e/fake-youtube.ts`](./web/e2e/fake-youtube.ts)) e consegue disparar o fim do vídeo ou os erros 101/150 sem acessar a rede. Para simular a API fora do ar, o teste chama `POST /__e2e/state` no mock, que passa a responder 503.
 
 ```bash
 cd web

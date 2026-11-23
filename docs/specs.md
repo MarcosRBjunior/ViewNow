@@ -87,7 +87,7 @@ Entregar um case de portfólio full-stack que mostre:
 | RF-22 | Busca por título | Campo no header; debounce de 300 ms; termo refletido em `?search=` na URL |
 | RF-23 | Paginação | Botão "Carregar mais" ou paginação numerada, usando `meta.total` |
 | RF-24 | Estados | Skeleton (`loading.tsx`), erro com "Tentar de novo" (`error.tsx`), mensagem de lista vazia / busca sem resultado |
-| RF-25 | Playlist incorporada (Nível 2) | `/playlist` toca a seleção via `embed/{primeiroId}?playlist={id2},{id3},...` |
+| RF-25 | Playlist incorporada (Nível 2) | `/playlist` toca a seleção via `embed/{primeiroId}?playlist={primeiroId},{id2},{id3},...` (o player usa a lista do parâmetro `playlist` inteira; sem o primeiro id ela começaria no segundo vídeo) |
 | RF-26 | Página do vídeo (Nível 3) | `/video/[youtubeId]` toca com autoplay; URL compartilhável |
 | RF-27 | Próximo vídeo | Ao terminar (`onEnd`), navega para o próximo da seleção |
 | RF-28 | Vídeo bloqueado | Erros 101/150 do player mostram aviso com link "Assistir no YouTube" |

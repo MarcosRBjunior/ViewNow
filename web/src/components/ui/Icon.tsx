@@ -31,6 +31,26 @@ const paths = {
       <path d="M4 4v4h4M20 20v-4h-4" />
     </>
   ),
+  external: (
+    <>
+      <path d="M14 4h6v6M20 4l-9 9" />
+      <path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10" />
+    </>
+  ),
+  next: <path d="M6 5.5v13l9-6.5-9-6.5ZM18 5v14" />,
+  volumeOff: (
+    <>
+      <path d="M11 5 6.5 8.5H4v7h2.5L11 19V5Z" />
+      <path d="m16 9.5 5 5M21 9.5l-5 5" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M10.3 4.2 2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z" />
+      <path d="M12 9.5v4.5M12 17h.01" />
+    </>
+  ),
+  hash: <path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16" />,
 } as const;
 
 export type IconName = keyof typeof paths;
