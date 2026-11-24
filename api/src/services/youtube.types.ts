@@ -29,12 +29,18 @@ export type PlaylistItemsResponse = {
   items?: PlaylistItem[];
 };
 
+/** Restrição de país do vídeo: só `allowed` (lista branca) ou só `blocked` (lista negra), em ISO 3166-1. */
+export type RegionRestriction = { allowed?: string[]; blocked?: string[] };
+
 export type VideoStatusItem = {
   id: string;
   status?: {
     embeddable?: boolean;
     privacyStatus?: string;
     uploadStatus?: string;
+  };
+  contentDetails?: {
+    regionRestriction?: RegionRestriction;
   };
 };
 

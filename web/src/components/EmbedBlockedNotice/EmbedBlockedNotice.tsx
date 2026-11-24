@@ -6,7 +6,7 @@ import styles from './EmbedBlockedNotice.module.css';
 
 type EmbedBlockedNoticeProps = {
   youtubeId: string;
-  /** Código de erro do player (100: indisponível; 101/150: incorporação bloqueada). */
+  /** Código de erro do player (100: indisponível; 101/150: incorporação bloqueada pelo dono ou bloqueio por país). */
   errorCode: number;
   nextHref?: string | null;
 };
@@ -26,7 +26,7 @@ export function EmbedBlockedNotice({ youtubeId, errorCode, nextHref }: EmbedBloc
       <p className={styles.text}>
         {unavailable
           ? 'Ele pode ter sido removido ou ficado privado no YouTube.'
-          : 'O dono do vídeo só permite assistir no próprio YouTube.'}
+          : 'O YouTube não liberou este vídeo para tocar aqui: o dono bloqueou a incorporação ou ele não está disponível no seu país.'}
       </p>
       <div className={styles.actions}>
         {!unavailable && (

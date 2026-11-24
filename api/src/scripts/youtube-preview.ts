@@ -20,7 +20,7 @@ try {
     })),
   );
   console.log(
-    `${videos.length} vídeo(s) públicos e incorporáveis (limite ${limit}) em ${ms} ms · playlist ${env.YOUTUBE_PLAYLIST_ID}`,
+    `${videos.length} vídeo(s) públicos, incorporáveis e disponíveis em ${env.YOUTUBE_REGION ?? 'qualquer país'} (limite ${limit}) em ${ms} ms · playlist ${env.YOUTUBE_PLAYLIST_ID}`,
   );
 } catch (error) {
   const message = error instanceof AppError ? `${error.code}: ${error.message}` : String(error);

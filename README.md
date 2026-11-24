@@ -3,6 +3,10 @@
 Galeria de vídeos montada a partir de uma playlist do YouTube, para assistir sem sair do site.
 Case full-stack com front e back desacoplados.
 
+**Site:** https://viewnow-marcosdev-ribeiro.vercel.app · **API:** https://viewnow-api-marcosdev-ribeiro.vercel.app/api/health
+
+![Galeria, busca, player com autoplay e playlist do ViewNow](./docs/assets/viewnow.gif)
+
 | Pasta | O que é | Stack |
 | --- | --- | --- |
 | [`api/`](./api) | API REST: sincroniza a playlist com o banco e serve os vídeos | Node 22 · Express 5 · TypeScript · Zod · Supabase |
@@ -10,7 +14,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 5 — Player**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 6 — Deploy**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -77,6 +81,43 @@ Base: `/api`. Erros sempre no formato `{ "error": { "code", "message" } }`. Cole
 | POST | `/sync` | Sincronização manual | `Bearer CRON_SECRET` |
 | GET | `/cron/sync` | Sincronização diária (Vercel Cron, 06:00 UTC) | `Bearer CRON_SECRET` |
 | GET | `/health` | Status da API e do banco | — |
+
+## Deploy (Vercel)
+
+Dois projetos da Vercel no mesmo repositório, cada um com a sua pasta como Root Directory:
+
+| Projeto | Pasta | URL de produção | Observações |
+| --- | --- | --- | --- |
+| `viewnow` | `web/` | https://viewnow-marcosdev-ribeiro.vercel.app | Next.js; dados com cache de 5 min; CSP e cabeçalhos de segurança em `next.config.ts` |
+| `viewnow-api` | `api/` | https://viewnow-api-marcosdev-ribeiro.vercel.app/api | Express como uma Vercel Function (entrada `src/index.ts`); Vercel Cron diária em `api/vercel.json` |
+
+- **Produção** sai da `main`; cada PR gera previews dos dois projetos, protegidos por login da Vercel.
+- **Região** `gru1` (São Paulo) nos dois projetos, ao lado do Supabase (`sa-east-1`).
+- **Ignored Build Step** `git diff --quiet HEAD^ HEAD ./`: um projeto só reconstrói quando a própria pasta muda.
+- **Variáveis** (Settings → Environment Variables): as da API seguem [`api/.env.example`](./api/.env.example) (segredos como *Sensitive*, `CRON_SECRET` de produção diferente do local); o web só precisa de `NEXT_PUBLIC_API_URL` e `NEXT_PUBLIC_YOUTUBE_PLAYLIST_ID`. Nenhuma chave vai para o navegador.
+- **Cron**: a Vercel chama `GET /api/cron/sync` às 06:00 UTC (03:00 em Brasília) com `Authorization: Bearer $CRON_SECRET`. Sync manual: `curl -X POST -H "Authorization: Bearer $CRON_SECRET" <api>/api/sync`.
+- **País do público**: a sync descarta vídeos bloqueados em `YOUTUBE_REGION` (padrão `BR`), para a seleção só ter o que toca para quem visita o site.
+
+## Segurança
+
+| Requisito | Como está |
+| --- | --- |
+| RLS em todas as tabelas | `public.videos` e `internal.sync_runs` com RLS e políticas que negam `anon` e `authenticated` nas 4 operações |
+| Secret key só no back-end | `SUPABASE_SECRET_KEY` só no projeto `viewnow-api` (Sensitive); o web não tem nenhuma chave do Supabase nem do YouTube |
+| Funções seguras | `log_sync_run` com `SECURITY DEFINER`, `search_path = public, pg_temp` e `EXECUTE` só para `service_role` |
+| Auth blindado | `config.toml`: cadastro desligado, confirmação de e-mail, sem login anônimo (o app não usa Auth) |
+| Storage | Nenhum bucket |
+| Dados internos fora da API | Log de sync no schema `internal`, que não é exposto pela API do Supabase |
+| SSL e restrição de IP | SSL obrigatório no Postgres; conexões diretas só de IPs liberados (a API usa a REST do Supabase por HTTPS, que não é afetada) |
+| Security Advisor | `npx supabase db advisors` sem avisos |
+| Web | CSP (só o próprio site, `i.ytimg.com` e o player do YouTube), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`; teste E2E confere os cabeçalhos e a ausência de violações |
+| API | `helmet`, CORS por allowlist, `CRON_SECRET` comparado em tempo constante, limites de `limit`/`search` |
+
+Se o seu IP mudar, libere o novo antes de rodar `supabase db push`:
+
+```bash
+npx supabase network-restrictions update --db-allow-cidr <seu-ip>/32 --project-ref <ref> --experimental
+```
 
 ## Documentação
 
