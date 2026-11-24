@@ -105,7 +105,7 @@ Dois projetos da Vercel no mesmo repositório, cada um com a sua pasta como Root
 | RLS em todas as tabelas | `public.videos` e `internal.sync_runs` com RLS e políticas que negam `anon` e `authenticated` nas 4 operações |
 | Secret key só no back-end | `SUPABASE_SECRET_KEY` só no projeto `viewnow-api` (Sensitive); o web não tem nenhuma chave do Supabase nem do YouTube |
 | Funções seguras | `log_sync_run` com `SECURITY DEFINER`, `search_path = public, pg_temp` e `EXECUTE` só para `service_role` |
-| Auth blindado | `config.toml`: cadastro desligado, confirmação de e-mail, sem login anônimo (o app não usa Auth) |
+| Auth blindado | Aplicado no projeto remoto com `supabase config push`: cadastro desligado, confirmação de e-mail, sem login anônimo, senha forte, MFA TOTP, Redirect URLs exatas (domínio da Vercel e `localhost:3000`). O app não usa Auth. Turnstile: bloco pronto (comentado) no `config.toml` |
 | Storage | Nenhum bucket |
 | Dados internos fora da API | Log de sync no schema `internal`, que não é exposto pela API do Supabase |
 | SSL e restrição de IP | SSL obrigatório no Postgres; conexões diretas só de IPs liberados (a API usa a REST do Supabase por HTTPS, que não é afetada) |
