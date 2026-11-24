@@ -1,0 +1,36 @@
+.player {
+  position: absolute;
+  inset: 0;
+}
+
+/* O IFrame API troca o placeholder por um <iframe>: estilizamos pelo seletor de filho. */
+.frame,
+.frame > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.unmute {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--black-20);
+  border-radius: var(--radius-pill);
+  background: rgba(15, 15, 15, 0.9);
+  color: var(--white);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.unmute:hover {
+  background: var(--red-45);
+}

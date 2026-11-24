@@ -1,0 +1,42 @@
+.card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: clamp(24px, 2.6vw, 50px);
+  border: 1px solid var(--black-15);
+  border-radius: var(--radius-card);
+  background: var(--black-10);
+}
+
+.list {
+  display: grid;
+  gap: clamp(20px, 1.6vw, 30px);
+}
+
+.item {
+  display: grid;
+  gap: 10px;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--grey-60);
+  font-size: var(--fs-body-l);
+  font-weight: 500;
+}
+
+.value {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.body {
+  font-size: var(--fs-body-l);
+  font-weight: 500;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

@@ -22,9 +22,19 @@ export function Header() {
           <ul className={styles.menu}>
             {links.map((link) => (
               <li key={link.href}>
-                <NavLink href={link.href} className={styles.menuItem}>
-                  {link.label}
-                </NavLink>
+                {/* usePathname() é dado da URL: em rotas dinâmicas precisa de Suspense para o
+                    header continuar no shell estático. O fallback é o mesmo link, sem destaque. */}
+                <Suspense
+                  fallback={
+                    <Link href={link.href} className={styles.menuItem}>
+                      {link.label}
+                    </Link>
+                  }
+                >
+                  <NavLink href={link.href} className={styles.menuItem}>
+                    {link.label}
+                  </NavLink>
+                </Suspense>
               </li>
             ))}
           </ul>

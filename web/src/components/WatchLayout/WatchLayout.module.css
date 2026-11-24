@@ -1,0 +1,133 @@
+/* Layout comum de /video/[youtubeId] e /playlist: player + informações à esquerda,
+   lista da seleção à direita (abaixo no mobile). */
+.page {
+  display: grid;
+  gap: var(--gap-grid);
+  padding-top: clamp(8px, 1vw, 20px);
+}
+
+@media (min-width: 1200px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr) clamp(380px, 26vw, 500px);
+    align-items: start;
+  }
+}
+
+.main {
+  display: grid;
+  gap: var(--gap-grid);
+  min-width: 0;
+}
+
+/* Caixa 16:9 do player, no lugar da key art do design. */
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--black-06);
+}
+
+.poster {
+  object-fit: cover;
+  opacity: 0.35;
+}
+
+.heading {
+  display: grid;
+  gap: 12px;
+}
+
+.eyebrow {
+  color: var(--grey-60);
+  font-size: var(--fs-body-s);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.nextLabel {
+  overflow: hidden;
+  max-width: min(42ch, 60vw);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details {
+  display: grid;
+  gap: var(--gap-grid);
+}
+
+@media (min-width: 900px) {
+  .details {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.aside {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: clamp(16px, 1.6vw, 30px) clamp(8px, 1vw, 20px);
+  border: 1px solid var(--black-15);
+  border-radius: var(--radius-card);
+  background: var(--black-10);
+}
+
+@media (min-width: 1200px) {
+  .aside {
+    position: sticky;
+    top: calc(clamp(72px, 6.8vw, 130px) + 8px);
+    max-height: calc(100dvh - clamp(72px, 6.8vw, 130px) - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.asideHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline: 12px;
+}
+
+.asideTitle {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
+
+.asideCount {
+  color: var(--grey-60);
+  font-size: var(--fs-body-s);
+}
+
+/* Skeleton */
+.skeletonTitle {
+  width: min(560px, 80%);
+  height: 40px;
+}
+
+.skeletonLine {
+  width: min(320px, 60%);
+  height: 20px;
+}
+
+.skeletonItem {
+  height: 84px;
+}
