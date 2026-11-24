@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
-// CSP: só o próprio site, as miniaturas do i.ytimg.com e o player do YouTube.
+// Origem da API: o player relata direto do navegador os vídeos que não tocam.
+const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/api').origin;
+
+// CSP: só o próprio site, a API, as miniaturas do i.ytimg.com e o player do YouTube.
 // 'unsafe-inline' em scripts é necessário porque as páginas usam Partial Prerender
 // (shell estático): nonce por request tornaria todas as páginas dinâmicas.
 // Em `next dev` a CSP fica desligada (o React precisa de eval para o overlay de erros).
@@ -12,7 +15,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://i.ytimg.com",
   "font-src 'self'",
-  "connect-src 'self'",
+  `connect-src 'self' ${apiOrigin}`,
   'frame-src www.youtube.com www.youtube-nocookie.com',
   "frame-ancestors 'none'",
   "object-src 'none'",

@@ -7,6 +7,7 @@ import { requestLogger } from './middlewares/requestLogger.js';
 import { createVideosRepository } from './repositories/videos.repository.js';
 import { createRoutes, type RoutesDeps } from './routes/index.js';
 import { runSync } from './services/sync.service.js';
+import { checkEmbeddable } from './services/youtube.service.js';
 
 export function createApp(deps: Partial<RoutesDeps> = {}) {
   const app = express();
@@ -28,6 +29,7 @@ export function createApp(deps: Partial<RoutesDeps> = {}) {
       repository: deps.repository ?? createVideosRepository(),
       runSync: deps.runSync ?? ((trigger) => runSync(trigger)),
       cronSecret: deps.cronSecret ?? env.CRON_SECRET,
+      checkEmbed: deps.checkEmbed ?? ((youtubeId) => checkEmbeddable(youtubeId)),
     }),
   );
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createSyncController, type RunSync } from '../controllers/sync.controller.js';
-import { createVideosController } from '../controllers/videos.controller.js';
+import { createVideosController, type ReportDeps } from '../controllers/videos.controller.js';
 import { requireCronSecret } from '../middlewares/requireCronSecret.js';
 import type { VideosRepository } from '../repositories/videos.repository.js';
 
@@ -8,11 +8,13 @@ export type RoutesDeps = {
   repository: VideosRepository;
   runSync: RunSync;
   cronSecret: string;
+  checkEmbed: ReportDeps['checkEmbed'];
 };
 
-export function createRoutes({ repository, runSync, cronSecret }: RoutesDeps) {
+export function createRoutes({ repository, runSync, cronSecret, checkEmbed }: RoutesDeps) {
   const routes = Router();
-  const videos = createVideosController(repository);
+  // O CRON_SECRET também serve de chave do HMAC dos relatos: já é secreto e longo.
+  const videos = createVideosController(repository, { checkEmbed, hashKey: cronSecret });
   const sync = createSyncController(runSync);
   const auth = requireCronSecret(cronSecret);
 
@@ -31,6 +33,7 @@ export function createRoutes({ repository, runSync, cronSecret }: RoutesDeps) {
   routes.get('/videos', videos.list);
   routes.get('/videos/:id', videos.show);
   routes.get('/videos/:id/embed', videos.embed);
+  routes.post('/videos/:id/report', videos.report);
 
   routes.post('/sync', auth, sync.manual);
   routes.get('/cron/sync', auth, sync.cron);

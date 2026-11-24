@@ -19,6 +19,13 @@ export type Video = {
 
 export type ListVideosParams = { page: number; limit: number; search?: string };
 export type SyncTrigger = 'manual' | 'cron' | 'cli';
+export type PlaybackErrorCode = 100 | 101 | 150;
+export type PlaybackReportResult = { isNew: boolean; reporters: number; hidden: boolean };
+
+/** Visitantes distintos que precisam relatar o erro, na janela, para o vídeo sumir sem confirmação. */
+export const REPORT_THRESHOLD = 3;
+/** Depois desse prazo a sync tira a marca de `unplayable_at` e o vídeo ganha nova chance. */
+export const UNPLAYABLE_RETRY_DAYS = 7;
 
 const PUBLIC_COLUMNS =
   'id, youtube_id, playlist_id, title, description, thumbnail_url, channel_title, position, published_at';
@@ -26,7 +33,9 @@ const PUBLIC_COLUMNS =
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function toVideo(row: Omit<VideoRow, 'visible' | 'created_at' | 'updated_at'>): Video {
+export function toVideo(
+  row: Omit<VideoRow, 'visible' | 'unplayable_at' | 'created_at' | 'updated_at'>,
+): Video {
   return {
     id: row.id,
     youtubeId: row.youtube_id,
@@ -60,13 +69,14 @@ function dbError(operation: string, error: { message: string; code?: string }): 
 
 export function createVideosRepository(client: SupabaseClient = defaultClient) {
   return {
-    /** Lista paginada só com vídeos visíveis, na ordem da playlist. */
+    /** Lista paginada só com vídeos visíveis e tocáveis, na ordem da playlist. */
     async listVisible({ page, limit, search }: ListVideosParams) {
       const from = (page - 1) * limit;
       let query = client
         .from('videos')
         .select(PUBLIC_COLUMNS, { count: 'exact' })
         .eq('visible', true)
+        .is('unplayable_at', null)
         .order('position', { ascending: true })
         .range(from, from + limit - 1);
 
@@ -87,6 +97,7 @@ export function createVideosRepository(client: SupabaseClient = defaultClient) {
         .select(PUBLIC_COLUMNS)
         .eq(column, id)
         .eq('visible', true)
+        .is('unplayable_at', null)
         .maybeSingle();
 
       if (error) throw dbError('findVisible', error);
@@ -120,6 +131,49 @@ export function createVideosRepository(client: SupabaseClient = defaultClient) {
 
       const { error, count } = await query;
       if (error) throw dbError('removeMissing', error);
+      return count ?? 0;
+    },
+
+    /**
+     * Registra o relato do player (internal.playback_reports) e esconde o vídeo quando
+     * `REPORT_THRESHOLD` visitantes distintos relatam em 24h. Tudo numa transação no banco.
+     */
+    async recordPlaybackReport(
+      youtubeId: string,
+      reporterHash: string,
+      errorCode: PlaybackErrorCode,
+    ): Promise<PlaybackReportResult> {
+      const { data, error } = await client
+        .rpc('record_playback_report', {
+          p_youtube_id: youtubeId,
+          p_reporter_hash: reporterHash,
+          p_error_code: errorCode,
+          p_threshold: REPORT_THRESHOLD,
+        })
+        .single();
+
+      if (error) throw dbError('recordPlaybackReport', error);
+      return { isNew: data.is_new, reporters: data.reporters, hidden: data.hidden };
+    },
+
+    /** Esconde o vídeo na hora (o YouTube confirmou que ele não toca incorporado). */
+    async markUnplayable(youtubeId: string): Promise<void> {
+      const { error } = await client
+        .from('videos')
+        .update({ unplayable_at: new Date().toISOString() })
+        .eq('youtube_id', youtubeId)
+        .is('unplayable_at', null);
+      if (error) throw dbError('markUnplayable', error);
+    },
+
+    /** Dá nova chance aos vídeos escondidos há mais de `days` dias. Devolve quantos voltaram. */
+    async clearStaleUnplayable(days = UNPLAYABLE_RETRY_DAYS): Promise<number> {
+      const cutoff = new Date(Date.now() - days * 86_400_000).toISOString();
+      const { error, count } = await client
+        .from('videos')
+        .update({ unplayable_at: null }, { count: 'exact' })
+        .lt('unplayable_at', cutoff);
+      if (error) throw dbError('clearStaleUnplayable', error);
       return count ?? 0;
     },
 

@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AUTOPLAY_CHECK_MS, VideoPlayer } from '@/components/VideoPlayer/VideoPlayer';
 
 const push = vi.fn();
+const reportUnplayable = vi.fn();
+vi.mock('@/services/playbackReport', () => ({
+  reportUnplayable: (...args: unknown[]) => reportUnplayable(...args),
+}));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
 // Guarda as props que o VideoPlayer passou ao react-youtube para disparar os eventos.
@@ -41,6 +45,7 @@ describe('VideoPlayer', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     push.mockClear();
+    reportUnplayable.mockClear();
   });
 
   afterEach(() => vi.useRealTimers());
@@ -96,6 +101,7 @@ describe('VideoPlayer', () => {
     fire('onError', code);
 
     expect(screen.getByRole('alert')).toHaveTextContent('Este vídeo não pode ser reproduzido aqui');
+    expect(reportUnplayable).toHaveBeenCalledWith('jIfogFtgV-o', code);
     expect(screen.getByRole('link', { name: 'Assistir no YouTube' })).toHaveAttribute(
       'href',
       'https://www.youtube.com/watch?v=jIfogFtgV-o',
@@ -111,6 +117,7 @@ describe('VideoPlayer', () => {
     player = fakePlayer(-1);
     fire('onError', 100);
     expect(screen.getByRole('alert')).toHaveTextContent('Este vídeo não está disponível');
+    expect(reportUnplayable).toHaveBeenCalledWith('jIfogFtgV-o', 100);
     expect(screen.queryByRole('link', { name: 'Assistir no YouTube' })).not.toBeInTheDocument();
   });
 
@@ -119,5 +126,6 @@ describe('VideoPlayer', () => {
     player = fakePlayer(-1);
     fire('onError', 5);
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(reportUnplayable).not.toHaveBeenCalled();
   });
 });

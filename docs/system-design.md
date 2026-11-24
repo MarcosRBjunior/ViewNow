@@ -186,6 +186,19 @@ Base: `/api`. Todas as respostas são JSON, `Content-Type: application/json; cha
 { "data": { "youtubeId": "jIfogFtgV-o", "embedUrl": "https://www.youtube.com/embed/jIfogFtgV-o?autoplay=1" } }
 ```
 
+### `POST /api/videos/:id/report`
+
+Corpo `{ "code": 100 | 101 | 150 }` (erros do IFrame Player). Resposta `202 { "data": { "hidden": true | false } }`, `Cache-Control: no-store`.
+
+1. `404` se o vídeo não existir ou já estiver escondido; `400` para outro código.
+2. `record_playback_report` (`SECURITY DEFINER`, só `service_role`) grava o relato em `internal.playback_reports` com `HMAC-SHA256(CRON_SECRET, IP)`, nunca o IP. Relato repetido do mesmo visitante em 24h não conta de novo.
+3. Com 3 visitantes distintos em 24h, a própria função grava `unplayable_at`.
+4. Se o relato é novo e o limite não foi atingido, a API consulta o oEmbed do YouTube (sem chave, sem cota). `401/403/404` confirmam o bloqueio e o vídeo some na hora.
+
+Por que não confiar só no relato: o endpoint é público, então um relato isolado nunca esconde nada sem confirmação do YouTube. Por que não confiar só no YouTube: bloqueios por país e muitos bloqueios de clipes de música só aparecem no player.
+
+A sync limpa `unplayable_at` com mais de 7 dias (nova tentativa). A coluna `visible` continua sendo só curadoria manual.
+
 ### `POST /api/sync` e `GET /api/cron/sync`
 
 Header obrigatório `Authorization: Bearer <CRON_SECRET>` → `401 UNAUTHORIZED` se ausente/errado.
@@ -257,7 +270,7 @@ Latência esperada: ~50–150 ms por consulta ao Supabase (mesma região da fun�
 | YouTube fora / cota estourada | Sync falha e é registrada; site segue servindo o último estado do banco |
 | Supabase fora | API devolve 503; páginas em cache continuam servindo o último HTML gerado (stale) até o banco voltar |
 | API fora | Páginas em cache continuam no ar; navegação nova cai em `error.tsx` com "Tentar de novo" |
-| Vídeo não incorporável não detectado | Player emite erro 101/150 → `EmbedBlockedNotice` com link para o YouTube; mantenedor marca `visible = false` |
+| Vídeo não incorporável não detectado | Player emite erro 101/150 → `EmbedBlockedNotice` com link para o YouTube e relato para a API, que esconde o vídeo (`unplayable_at`) |
 | Cron não executa | Dados ficam até 1 dia defasados; `POST /api/sync` manual resolve |
 
 ## 9. Estratégia de testes
@@ -273,6 +286,5 @@ Latência esperada: ~50–150 ms por consulta ao Supabase (mesma região da fun�
 ## 10. Evolução futura
 
 - Múltiplas playlists (coluna `playlist_id` já existe) com filtro por "categoria" na UI, aproveitando os carrosséis do StreamVibe.
-- Rota protegida para marcar `visible = false` automaticamente quando o player reportar 101/150.
 - Busca com `pg_trgm` / full-text se o catálogo crescer.
 - Lock distribuído da sync via `pg_advisory_lock` dentro de uma função `SECURITY DEFINER`.

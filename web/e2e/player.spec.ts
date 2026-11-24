@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { fakePlayer, firePlayer, stubYouTube } from './fake-youtube';
 import { cards, stubImages } from './helpers';
+import { MOCK_API_URL } from './ports';
 
 const FIRST = 'jIfogFtgV-o';
 const SECOND = '0YF8vecQWYs';
@@ -75,6 +76,13 @@ test('vídeo com incorporação bloqueada mostra aviso com link para o YouTube',
   await expect.poll(async () => (await fakePlayer(page))?.state).toBe(1);
 
   await firePlayer(page, 150);
+
+  // O player relata o vídeo para a API (passa pela CSP connect-src e pelo CORS).
+  await expect
+    .poll(
+      async () => (await (await page.request.get(`${MOCK_API_URL}/__e2e/reports`)).json()).reports,
+    )
+    .toContain(FIRST);
 
   const notice = page.getByRole('alert').filter({ hasText: 'não pode ser reproduzido aqui' });
   await expect(notice).toBeVisible();

@@ -6,6 +6,7 @@ import YouTube, { type YouTubeEvent, type YouTubeProps } from 'react-youtube';
 import { EmbedBlockedNotice } from '@/components/EmbedBlockedNotice/EmbedBlockedNotice';
 import { Icon } from '@/components/ui/Icon';
 import { UNPLAYABLE_ERRORS } from '@/lib/youtube';
+import { reportUnplayable } from '@/services/playbackReport';
 import styles from './VideoPlayer.module.css';
 
 /** Tempo para conferir se o navegador deixou o autoplay com som começar. */
@@ -74,6 +75,8 @@ export function VideoPlayer({ youtubeId, title, nextHref }: VideoPlayerProps) {
     if (UNPLAYABLE_ERRORS.has(event.data)) {
       window.clearTimeout(timerRef.current);
       setErrorCode(event.data);
+      // A API esconde o vídeo da galeria quando confirma que ele não toca aqui.
+      reportUnplayable(youtubeId, event.data);
     }
   }
 

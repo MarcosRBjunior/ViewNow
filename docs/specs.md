@@ -70,7 +70,7 @@ Entregar um case de portfólio full-stack que mostre:
 | RF-04 | Persistir com upsert idempotente | Upsert por `youtube_id`; nunca sobrescreve `visible`; rodar 2x não duplica |
 | RF-05 | Remover da seleção vídeos que saíram da playlist | Vídeos da mesma `playlist_id` ausentes no último fetch são apagados |
 | RF-06 | Registrar cada execução de sync | Linha em `internal.sync_runs` com status, quantidade e erro |
-| RF-07 | Listar vídeos | `GET /api/videos?page&limit&search`, só `visible = true`, ordenado por `position` |
+| RF-07 | Listar vídeos | `GET /api/videos?page&limit&search`, só `visible = true` e `unplayable_at is null`, ordenado por `position` |
 | RF-08 | Buscar um vídeo | `GET /api/videos/:id` aceita uuid ou `youtube_id`; 404 se não existir ou estiver oculto |
 | RF-09 | Dados de incorporação | `GET /api/videos/:id/embed` devolve `youtubeId` e `embedUrl` com `autoplay=1` |
 | RF-10 | Disparar sync manual | `POST /api/sync` com `Authorization: Bearer <CRON_SECRET>`; 401 sem o header |
@@ -91,6 +91,7 @@ Entregar um case de portfólio full-stack que mostre:
 | RF-26 | Página do vídeo (Nível 3) | `/video/[youtubeId]` toca com autoplay; URL compartilhável |
 | RF-27 | Próximo vídeo | Ao terminar (`onEnd`), navega para o próximo da seleção |
 | RF-28 | Vídeo bloqueado | Erros 101/150 do player mostram aviso com link "Assistir no YouTube" |
+| RF-29 | Esconder vídeo que não toca | Erros 100/101/150 geram `POST /api/videos/:id/report`. A API grava `unplayable_at` na hora se o oEmbed confirmar o bloqueio, ou depois de 3 visitantes distintos (HMAC do IP, nunca o IP) em 24h. A sync limpa a marca após 7 dias para tentar de novo |
 | RF-29 | Lista lateral | Na página do vídeo, a seleção aparece ao lado (abaixo no mobile) com o vídeo atual destacado |
 
 ## 5. Contrato resumido da API
@@ -100,6 +101,7 @@ Entregar um case de portfólio full-stack que mostre:
 | GET | `/api/videos` | — | `{ data: Video[], meta: { page, limit, total } }` |
 | GET | `/api/videos/:id` | — | `{ data: VideoDetail }` |
 | GET | `/api/videos/:id/embed` | — | `{ data: { youtubeId, embedUrl } }` |
+| POST | `/api/videos/:id/report` | — | `202 { data: { hidden } }` |
 | POST | `/api/sync` | Bearer `CRON_SECRET` | `{ data: { status, videosFetched, removed, durationMs } }` |
 | GET | `/api/cron/sync` | Bearer `CRON_SECRET` | idem |
 | GET | `/api/health` | — | `{ status: "ok" \| "degraded", db: "ok" \| "error", time }` |

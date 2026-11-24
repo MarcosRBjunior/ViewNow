@@ -3,7 +3,8 @@
 // Sem banco e sem YouTube, então o resultado é sempre o mesmo, local ou no CI.
 //
 // Controle (só para os testes): POST /__e2e/state com {"down": true|false} faz todas
-// as rotas /api/* responderem 503, simulando a API fora do ar.
+// as rotas /api/* responderem 503, simulando a API fora do ar. GET /__e2e/reports lista
+// os ids relatados pelo player em POST /api/videos/:id/report.
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 
@@ -14,6 +15,7 @@ const videos = JSON.parse(readFileSync(new URL('./fixtures/videos.json', import.
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let down = false;
+const reports = [];
 
 const toListItem = ({
   id,
@@ -79,6 +81,20 @@ const server = createServer((req, res) => {
     });
     return;
   }
+
+  // Relato do player (POST /api/videos/:id/report), chamado do navegador: precisa de CORS.
+  if (url.pathname.match(/^\/api\/videos\/[^/]+\/report$/)) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    if (req.method === 'OPTIONS') return void res.writeHead(204).end();
+    if (req.method === 'POST') {
+      req.resume();
+      reports.push(decodeURIComponent(url.pathname.split('/')[3]));
+      return send(res, 202, { data: { hidden: false } });
+    }
+  }
+  if (url.pathname === '/__e2e/reports') return send(res, 200, { reports });
 
   if (down) return error(res, 503, 'SERVICE_UNAVAILABLE', 'API fora do ar (simulado)');
   if (req.method !== 'GET') return error(res, 404, 'NOT_FOUND', 'Rota não encontrada');

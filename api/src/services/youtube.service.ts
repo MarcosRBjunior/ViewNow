@@ -213,3 +213,32 @@ export function toAppError(resource: string, status: number, body: YoutubeErrorB
 function logYoutubeError(resource: string, status: number, reason: string) {
   console.error(JSON.stringify({ level: 'error', source: 'youtube', resource, status, reason }));
 }
+
+export type EmbedCheck = 'blocked' | 'playable' | 'unknown';
+
+/**
+ * Confirma no oEmbed do YouTube (público, sem chave e sem cota) se o vídeo toca incorporado.
+ * 401/403: incorporação desativada ou vídeo privado; 400/404: removido ou id inválido.
+ * Bloqueio por país e alguns bloqueios do dono não aparecem aqui: esses dependem dos relatos.
+ */
+export async function checkEmbeddable(
+  youtubeId: string,
+  deps: Partial<Pick<YoutubeDeps, 'fetch' | 'timeoutMs'>> = {},
+): Promise<EmbedCheck> {
+  const doFetch = deps.fetch ?? globalThis.fetch;
+  const url = new URL('https://www.youtube.com/oembed');
+  url.searchParams.set('url', `https://www.youtube.com/watch?v=${youtubeId}`);
+  url.searchParams.set('format', 'json');
+
+  try {
+    const response = await doFetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(deps.timeoutMs ?? 5_000),
+    });
+    if (response.ok) return 'playable';
+    if ([400, 401, 403, 404].includes(response.status)) return 'blocked';
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
