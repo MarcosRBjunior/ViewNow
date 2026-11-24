@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createApp } from '../../src/app.js';
+import { createApp } from '../../src/createApp.js';
 import { AppError } from '../../src/errors/AppError.js';
 import type { Video, VideosRepository } from '../../src/repositories/videos.repository.js';
 

@@ -44,7 +44,7 @@ ViewNow/
 ├─ api/                         # Projeto Vercel 1 (Root Directory: api/)
 │  ├─ src/
 │  │  ├─ index.ts               # cria o app Express; export default app; listen só fora da Vercel
-│  │  ├─ app.ts                 # middlewares (cors, json, rotas, erro)
+│  │  ├─ createApp.ts           # middlewares (cors, json, rotas, erro); não usar app.ts: a Vercel o trataria como entrypoint
 │  │  ├─ config/env.ts          # validação das variáveis com zod
 │  │  ├─ lib/
 │  │  │  ├─ supabase.ts         # cliente com SUPABASE_SECRET_KEY
