@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppError } from '../../src/errors/AppError.js';
 import {
   fetchPlaylistVideos,
+  isAvailableInRegion,
   isPublicItem,
   mapPlaylistItem,
   pickThumbnail,
@@ -47,12 +48,32 @@ describe('fetchPlaylistVideos', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  const run = (max: number) =>
-    fetchPlaylistVideos(PLAYLIST, max, { apiKey: API_KEY, fetch: fetchMock as typeof fetch });
+  const run = (max: number, region: string | null = 'BR') =>
+    fetchPlaylistVideos(PLAYLIST, max, {
+      apiKey: API_KEY,
+      fetch: fetchMock as typeof fetch,
+      region,
+    });
 
-  it('devolve só vídeos públicos, incorporáveis e sem repetição, na ordem da playlist', async () => {
+  it('devolve só vídeos públicos, incorporáveis, que tocam no BR e sem repetição, na ordem', async () => {
     const videos = await run(20);
-    expect(videos.map((video) => video.youtubeId)).toEqual([
+    expect(videos.map((video) => video.youtubeId)).toEqual(['video000001', 'video000003']);
+  });
+
+  it('descarta vídeos bloqueados na região do público (lista negra ou lista branca sem o país)', async () => {
+    const ids = (await run(20)).map((video) => video.youtubeId);
+    expect(ids).toContain('video000003'); // allowed inclui BR
+    expect(ids).not.toContain('video000008'); // allowed só DE/AT/CH
+    expect(ids).not.toContain('video000009'); // blocked inclui BR
+  });
+
+  it('o filtro usa a região configurada; sem região, não filtra por país', async () => {
+    expect((await run(20, 'DE')).map((video) => video.youtubeId)).toEqual([
+      'video000001',
+      'video000008',
+      'video000009',
+    ]);
+    expect((await run(20, null)).map((video) => video.youtubeId)).toEqual([
       'video000001',
       'video000003',
       'video000008',
@@ -90,7 +111,8 @@ describe('fetchPlaylistVideos', () => {
     expect(playlistCall!.searchParams.get('key')).toBe(API_KEY);
 
     const [videosCall] = callsTo(fetchMock, 'videos');
-    expect(videosCall!.searchParams.get('part')).toBe('status');
+    // contentDetails traz a restrição de país; videos.list custa 1 unidade com qualquer part.
+    expect(videosCall!.searchParams.get('part')).toBe('status,contentDetails');
     // 4 candidatos: público + sem repetição (privado, excluído e duplicado não gastam consulta)
     expect(videosCall!.searchParams.get('id')!.split(',')).toEqual([
       'video000001',
@@ -200,6 +222,17 @@ describe('mapeamento', () => {
     expect(pickThumbnail({ default: { url: 'd' } })).toBe('d');
     expect(pickThumbnail({})).toBeNull();
     expect(pickThumbnail(undefined)).toBeNull();
+  });
+
+  it('isAvailableInRegion respeita lista branca, lista negra e ausência de restrição', () => {
+    expect(isAvailableInRegion(undefined, 'BR')).toBe(true);
+    expect(isAvailableInRegion({}, 'BR')).toBe(true);
+    expect(isAvailableInRegion({ allowed: ['BR', 'PT'] }, 'BR')).toBe(true);
+    expect(isAvailableInRegion({ allowed: ['DE'] }, 'BR')).toBe(false);
+    expect(isAvailableInRegion({ allowed: [] }, 'BR')).toBe(false);
+    expect(isAvailableInRegion({ blocked: ['BR'] }, 'BR')).toBe(false);
+    expect(isAvailableInRegion({ blocked: ['US'] }, 'BR')).toBe(true);
+    expect(isAvailableInRegion({ blocked: ['BR'] }, null)).toBe(true);
   });
 
   it('isPublicItem aceita só itens públicos com videoId', () => {

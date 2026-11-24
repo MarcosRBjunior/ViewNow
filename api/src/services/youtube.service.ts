@@ -4,6 +4,7 @@ import type {
   PlaylistItem,
   PlaylistItemsResponse,
   PlaylistVideo,
+  RegionRestriction,
   VideosResponse,
   YoutubeErrorBody,
   YoutubeThumbnails,
@@ -17,16 +18,20 @@ export type YoutubeDeps = {
   apiKey: string;
   fetch: typeof globalThis.fetch;
   timeoutMs: number;
+  /** País do público: vídeos bloqueados nele são descartados. `null` desliga o filtro. */
+  region: string | null;
 };
 
 const defaultDeps = (): YoutubeDeps => ({
   apiKey: env.YOUTUBE_API_KEY,
   fetch: globalThis.fetch,
   timeoutMs: 10_000,
+  region: env.YOUTUBE_REGION,
 });
 
 /**
- * Busca até `max` vídeos públicos e incorporáveis da playlist, já no formato do banco.
+ * Busca até `max` vídeos públicos, incorporáveis e disponíveis na região do público,
+ * já no formato do banco.
  * Custo de cota: 2 unidades por página de 50 itens (playlistItems.list + videos.list).
  */
 export async function fetchPlaylistVideos(
@@ -61,14 +66,14 @@ export async function fetchPlaylistVideos(
     });
 
     if (candidates.length > 0) {
-      const embeddable = await fetchEmbeddableIds(
+      const playable = await fetchPlayableIds(
         candidates.map((item) => item.contentDetails!.videoId!),
         d,
       );
 
       for (const item of candidates) {
         if (result.length >= max) break;
-        if (embeddable.has(item.contentDetails!.videoId!)) {
+        if (playable.has(item.contentDetails!.videoId!)) {
           result.push(mapPlaylistItem(item, playlistId));
         }
       }
@@ -85,21 +90,41 @@ export function isPublicItem(item: PlaylistItem): boolean {
   return Boolean(item.contentDetails?.videoId) && item.status?.privacyStatus === 'public';
 }
 
-/** Consulta videos.list (part=status) e devolve só os ids com embeddable = true. */
-async function fetchEmbeddableIds(ids: string[], deps: YoutubeDeps): Promise<Set<string>> {
+/**
+ * Consulta videos.list (part=status,contentDetails; custa 1 unidade como antes) e devolve só
+ * os ids incorporáveis e que tocam na região do público.
+ */
+async function fetchPlayableIds(ids: string[], deps: YoutubeDeps): Promise<Set<string>> {
   const response = await youtubeGet<VideosResponse>(
     'videos',
-    { part: 'status', id: ids.join(','), maxResults: String(PAGE_SIZE) },
+    { part: 'status,contentDetails', id: ids.join(','), maxResults: String(PAGE_SIZE) },
     deps,
   );
 
   return new Set(
     (response.items ?? [])
       .filter(
-        (video) => video.status?.embeddable === true && video.status.privacyStatus !== 'private',
+        (video) =>
+          video.status?.embeddable === true &&
+          video.status.privacyStatus !== 'private' &&
+          isAvailableInRegion(video.contentDetails?.regionRestriction, deps.region),
       )
       .map((video) => video.id),
   );
+}
+
+/**
+ * `allowed` é lista branca (só toca nesses países); `blocked` é lista negra.
+ * Sem restrição ou sem região configurada, o vídeo passa.
+ */
+export function isAvailableInRegion(
+  restriction: RegionRestriction | undefined,
+  region: string | null,
+): boolean {
+  if (!region || !restriction) return true;
+  if (restriction.allowed) return restriction.allowed.includes(region);
+  if (restriction.blocked) return !restriction.blocked.includes(region);
+  return true;
 }
 
 export function mapPlaylistItem(item: PlaylistItem, playlistId: string): PlaylistVideo {

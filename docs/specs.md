@@ -65,7 +65,7 @@ Entregar um case de portfólio full-stack que mostre:
 | ID | Requisito | Critério de aceite |
 | --- | --- | --- |
 | RF-01 | Buscar os vídeos da playlist na YouTube Data API (`playlistItems.list`) | Respeita `YOUTUBE_MAX_VIDEOS`; pagina com `nextPageToken` só se o limite passar de 50 |
-| RF-02 | Filtrar vídeos privados/excluídos e não incorporáveis | Descarta `privacyStatus != public` e `status.embeddable = false` (via `videos.list`, até 50 ids por chamada) |
+| RF-02 | Filtrar vídeos privados/excluídos, não incorporáveis e bloqueados no país do público | Descarta `privacyStatus != public`, `status.embeddable = false` e `contentDetails.regionRestriction` que bloqueia `YOUTUBE_REGION` (padrão `BR`), via `videos.list`, até 50 ids por chamada |
 | RF-03 | Mapear para o modelo interno | `youtubeId, title, description, thumbnailUrl, channelTitle, position, publishedAt` (thumbnail `high` → fallback `medium` → `default`) |
 | RF-04 | Persistir com upsert idempotente | Upsert por `youtube_id`; nunca sobrescreve `visible`; rodar 2x não duplica |
 | RF-05 | Remover da seleção vídeos que saíram da playlist | Vídeos da mesma `playlist_id` ausentes no último fetch são apagados |
@@ -180,6 +180,7 @@ Contrastes já validados: branco/Black 08 = 18,4:1 · Grey 60/Black 08 = 6,5:1 �
 | `api/` | `YOUTUBE_API_KEY` | `AIza...` | Sim |
 | `api/` | `YOUTUBE_PLAYLIST_ID` | `PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu` | Não |
 | `api/` | `YOUTUBE_MAX_VIDEOS` | `20` | Não |
+| `api/` | `YOUTUBE_REGION` | `BR` (vazio desliga o filtro de país) | Não |
 | `api/` | `SUPABASE_URL` | `https://xxx.supabase.co` | Não |
 | `api/` | `SUPABASE_SECRET_KEY` | `sb_secret_...` | **Sim (máximo)** |
 | `api/` | `CRON_SECRET` | texto aleatório ≥ 32 chars | Sim |
