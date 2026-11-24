@@ -1,19 +1,27 @@
-.hero {
+.home {
   display: grid;
-  gap: 14px;
-  padding-block: clamp(64px, 10vw, 200px);
-  text-align: center;
-  justify-items: center;
+  gap: clamp(64px, 6.25vw, 120px);
+  padding-top: clamp(8px, 1vw, 20px);
 }
 
-.title {
-  font-size: var(--fs-display);
-  font-weight: 700;
+/* Caixa com rótulo vermelho sobre a borda, como as seções "Movies"/"Shows" do design. */
+.section {
+  position: relative;
+  padding: clamp(40px, 2.6vw, 50px) clamp(16px, 2.6vw, 50px) clamp(24px, 2.6vw, 50px);
+  border: 1px solid var(--black-15);
+  border-radius: var(--radius-card);
+  scroll-margin-top: 140px;
+}
+
+.sectionLabel {
+  position: absolute;
+  top: 0;
+  left: clamp(16px, 2.6vw, 50px);
+  translate: 0 -50%;
+  padding: 10px 24px;
+  border-radius: var(--radius-control);
+  background: var(--red-45);
+  font-size: var(--fs-label);
+  font-weight: 600;
   line-height: 1.2;
-}
-
-.text {
-  max-width: 64ch;
-  color: var(--grey-60);
-  font-size: var(--fs-body-l);
 }

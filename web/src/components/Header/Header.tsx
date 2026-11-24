@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
+import { SearchInput, SearchInputFallback } from '@/components/SearchInput/SearchInput';
+import { NavLink } from './NavLink';
 import styles from './Header.module.css';
 
 const links = [
@@ -12,20 +15,26 @@ export function Header() {
       <div className={`container ${styles.inner}`}>
         <Link href="/" className={styles.logo} aria-label="ViewNow, página inicial">
           <span className={styles.logoMark} aria-hidden="true" />
-          ViewNow
+          <span className={styles.logoText}>ViewNow</span>
         </Link>
 
-        <nav aria-label="Principal">
+        <nav aria-label="Principal" className={styles.nav}>
           <ul className={styles.menu}>
             {links.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className={styles.menuItem}>
+                <NavLink href={link.href} className={styles.menuItem}>
                   {link.label}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>
         </nav>
+
+        <div className={styles.actions}>
+          <Suspense fallback={<SearchInputFallback />}>
+            <SearchInput />
+          </Suspense>
+        </div>
       </div>
     </header>
   );

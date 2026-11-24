@@ -10,7 +10,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 3 — API REST**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **Etapa 4 — Galeria**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
@@ -43,7 +43,27 @@ Teste rápido: `curl http://localhost:3333/api/health`.
 | `api/` | `npm run db:types` | Regera `src/lib/database.types.ts` a partir do banco ligado |
 | `api/` | `npm run lint` / `npm run typecheck` | Qualidade |
 | `web/` | `npm run dev` / `npm run build` | Next.js |
+| `web/` | `npm test` | Testes de componente (Vitest + React Testing Library) |
+| `web/` | `npm run test:e2e` | Testes E2E no navegador (Playwright), com build de produção e API mock |
 | `web/` | `npm run lint` / `npm run typecheck` | Qualidade |
+
+## Testes
+
+Três níveis, todos rodando no CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) a cada push e PR:
+
+| Nível | Ferramenta | O que cobre | Onde roda no CI |
+| --- | --- | --- | --- |
+| Unitário e de rota (API) | Vitest + supertest | Mapeamento e filtros do YouTube, sync, repositório e as 6 rotas com o banco mockado | job `api` (`npm test` em `api/`) |
+| Componente (web) | Vitest + React Testing Library | Cards, galeria e estados, paginação, busca com debounce, utilitários | job `web` (`npm test` em `web/`) |
+| E2E (web) | Playwright (Chromium) | A galeria no navegador: destaque e grade, busca digitando, busca vazia, paginação, API fora do ar com "Tentar de novo", layout em 390 px | job `e2e` (`npm run test:e2e` em `web/`) |
+
+O E2E não depende do Supabase nem da chave do YouTube: o Playwright sobe uma API mock ([`web/e2e/mock-api.mjs`](./web/e2e/mock-api.mjs)) com o mesmo contrato da API real e 20 vídeos fixos em [`web/e2e/fixtures/videos.json`](./web/e2e/fixtures/videos.json), faz o build de produção do Next apontando para ela e roda os testes em série. Para simular a API fora do ar, o teste chama `POST /__e2e/state` no mock, que passa a responder 503.
+
+```bash
+cd web
+npx playwright install chromium   # uma vez
+npm run test:e2e                  # sobe mock + build + next start nas portas 3334 e 3201
+```
 
 ## Rotas da API
 
