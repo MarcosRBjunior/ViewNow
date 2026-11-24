@@ -253,7 +253,7 @@ Latência esperada: ~50–150 ms por consulta ao Supabase (mesma região da fun�
 | SQL injection / curingas | supabase-js parametrizado; escape de `%` e `_` no `ILIKE` |
 | CORS | Allowlist por `CORS_ORIGIN` (lista separada por vírgula); sem `*` |
 | Cabeçalhos | `helmet` na API; no Next, `Content-Security-Policy` com `frame-src https://www.youtube.com https://www.youtube-nocookie.com` e `img-src https://i.ytimg.com` |
-| Auth do Supabase não usado | Cadastros desligados, confirmação de e-mail, Turnstile, Redirect URLs exatas |
+| Auth do Supabase não usado | Cadastros desligados, confirmação de e-mail, Redirect URLs exatas e senha forte (aplicados com `supabase config push`); CAPTCHA Turnstile ligado (secret fora do repo, via `env()`) |
 | Regressão de segurança | Security Advisor do Supabase antes de cada release; SSL obrigatório; Network Restrictions |
 
 ## 7. Observabilidade
