@@ -151,8 +151,9 @@ flowchart LR
 | --- | --- | --- | --- |
 | Local | `localhost:3000` | `localhost:3333` (`tsx watch`) | Projeto Supabase (ou `supabase start` local) |
 | Preview | URL de preview da Vercel | URL de preview da Vercel | Mesmo projeto Supabase (somente leitura na prática) |
-| Produção | `viewnow.vercel.app` (ou domínio próprio) | `viewnow-api.vercel.app` | Projeto Supabase de produção |
+| Produção | `viewnow-marcosdev-ribeiro.vercel.app` (projeto `viewnow`) | `viewnow-api-marcosdev-ribeiro.vercel.app` (projeto `viewnow-api`) | Projeto Supabase de produção (`sa-east-1`) |
 
+- Funções na região `gru1` (São Paulo), ao lado do Supabase (`sa-east-1`).
 - Cada projeto Vercel usa **Ignored Build Step** (`git diff --quiet HEAD^ HEAD ./`) para só rebuildar quando a própria pasta mudar.
 - Migrations são aplicadas manualmente (`supabase db push`) antes do deploy que depende delas.
 - Cron declarado em `api/vercel.json` — roda só em produção.

@@ -184,7 +184,7 @@ Contrastes já validados: branco/Black 08 = 18,4:1 · Grey 60/Black 08 = 6,5:1 �
 | `api/` | `SUPABASE_URL` | `https://xxx.supabase.co` | Não |
 | `api/` | `SUPABASE_SECRET_KEY` | `sb_secret_...` | **Sim (máximo)** |
 | `api/` | `CRON_SECRET` | texto aleatório ≥ 32 chars | Sim |
-| `api/` | `CORS_ORIGIN` | `http://localhost:3000,https://viewnow.vercel.app` | Não |
+| `api/` | `CORS_ORIGIN` | `http://localhost:3000,https://viewnow-marcosdev-ribeiro.vercel.app` | Não |
 | `api/` | `PORT` | `3333` (só local) | Não |
 | `web/` | `NEXT_PUBLIC_API_URL` | `http://localhost:3333/api` | Não |
 | `web/` | `NEXT_PUBLIC_YOUTUBE_PLAYLIST_ID` | `PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu` | Não |
