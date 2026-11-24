@@ -1,7 +1,10 @@
+import type { Express } from 'express';
 import { createApp } from './createApp.js';
 import { env } from './config/env.js';
 
-const app = createApp();
+// Entrypoint da Vercel: o preset Express procura um arquivo que importe `express`
+// e tenha `export default` do app (por isso a fábrica fica em createApp.ts, não app.ts).
+const app: Express = createApp();
 
 // Na Vercel o Express roda como função (export default); localmente sobe o servidor.
 if (!process.env.VERCEL) {
