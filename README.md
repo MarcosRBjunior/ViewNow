@@ -78,6 +78,7 @@ Base: `/api`. Erros sempre no formato `{ "error": { "code", "message" } }`. Cole
 | GET | `/videos?page&limit&search` | Lista paginada (limit 1–50, padrão 12), só vídeos visíveis, ordenada pela playlist | — |
 | GET | `/videos/:id` | Um vídeo por uuid ou `youtube_id`; 404 se não existir ou estiver oculto | — |
 | GET | `/videos/:id/embed` | `youtubeId` e `embedUrl` com `autoplay=1` | — |
+| POST | `/videos/:id/report` | O player relata que o vídeo não tocou (`{ code: 100 \| 101 \| 150 }`). Esconde na hora se o oEmbed do YouTube confirmar, ou depois de 3 visitantes distintos em 24h | — |
 | POST | `/sync` | Sincronização manual | `Bearer CRON_SECRET` |
 | GET | `/cron/sync` | Sincronização diária (Vercel Cron, 06:00 UTC) | `Bearer CRON_SECRET` |
 | GET | `/health` | Status da API e do banco | — |
@@ -102,7 +103,7 @@ Dois projetos da Vercel no mesmo repositório, cada um com a sua pasta como Root
 
 | Requisito | Como está |
 | --- | --- |
-| RLS em todas as tabelas | `public.videos` e `internal.sync_runs` com RLS e políticas que negam `anon` e `authenticated` nas 4 operações |
+| RLS em todas as tabelas | `public.videos`, `internal.sync_runs` e `internal.playback_reports` com RLS e políticas que negam `anon` e `authenticated` nas 4 operações |
 | Secret key só no back-end | `SUPABASE_SECRET_KEY` só no projeto `viewnow-api` (Sensitive); o web não tem nenhuma chave do Supabase nem do YouTube |
 | Funções seguras | `log_sync_run` com `SECURITY DEFINER`, `search_path = public, pg_temp` e `EXECUTE` só para `service_role` |
 | Auth blindado | Aplicado no projeto remoto com `supabase config push`: cadastro desligado, confirmação de e-mail, sem login anônimo, senha forte, MFA TOTP, Redirect URLs exatas (domínio da Vercel e `localhost:3000`). O app não usa Auth. CAPTCHA Turnstile ligado (secret só por variável de ambiente) |

@@ -25,6 +25,7 @@ export type Database = {
           published_at: string | null
           thumbnail_url: string | null
           title: string
+          unplayable_at: string | null
           updated_at: string
           visible: boolean
           youtube_id: string
@@ -39,6 +40,7 @@ export type Database = {
           published_at?: string | null
           thumbnail_url?: string | null
           title: string
+          unplayable_at?: string | null
           updated_at?: string
           visible?: boolean
           youtube_id: string
@@ -53,6 +55,7 @@ export type Database = {
           published_at?: string | null
           thumbnail_url?: string | null
           title?: string
+          unplayable_at?: string | null
           updated_at?: string
           visible?: boolean
           youtube_id?: string
@@ -74,6 +77,20 @@ export type Database = {
           p_videos_removed: number
         }
         Returns: number
+      }
+      record_playback_report: {
+        Args: {
+          p_error_code: number
+          p_reporter_hash: string
+          p_threshold?: number
+          p_window?: unknown
+          p_youtube_id: string
+        }
+        Returns: {
+          hidden: boolean
+          is_new: boolean
+          reporters: number
+        }[]
       }
     }
     Enums: {

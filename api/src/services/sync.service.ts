@@ -24,7 +24,8 @@ type SyncDeps = {
 let running = false;
 
 /**
- * Sincroniza a playlist com o banco: YouTube → upsert → remoção dos que saíram → log.
+ * Sincroniza a playlist com o banco: YouTube → upsert → nova chance aos vídeos escondidos
+ * pelo player → remoção dos que saíram → log.
  * Só uma execução por instância de cada vez.
  */
 export async function runSync(
@@ -59,6 +60,8 @@ export async function runSync(
     }
 
     await d.repository.upsertMany(videos);
+    // Vídeos escondidos pelo player há mais de 7 dias voltam para uma nova tentativa.
+    await d.repository.clearStaleUnplayable();
     const removed = await d.repository.removeMissing(
       d.playlistId,
       videos.map((video) => video.youtubeId),

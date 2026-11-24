@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppError } from '../../src/errors/AppError.js';
 import {
+  checkEmbeddable,
   fetchPlaylistVideos,
   isAvailableInRegion,
   isPublicItem,
@@ -237,5 +238,31 @@ describe('mapeamento', () => {
 
   it('isPublicItem aceita só itens públicos com videoId', () => {
     expect(page1.items.map(isPublicItem)).toEqual([true, false, true, true, true, false, true]);
+  });
+});
+
+describe('checkEmbeddable (oEmbed)', () => {
+  const respond = (status: number) => vi.fn(async () => new Response('{}', { status }));
+
+  it('200 significa que toca incorporado', async () => {
+    const fetch = respond(200);
+    expect(await checkEmbeddable('video000001', { fetch })).toBe('playable');
+    const url = new URL(String((fetch.mock.calls[0] as unknown[])[0]));
+    expect(url.origin + url.pathname).toBe('https://www.youtube.com/oembed');
+    expect(url.searchParams.get('url')).toBe('https://www.youtube.com/watch?v=video000001');
+    expect(url.searchParams.has('key')).toBe(false);
+  });
+
+  it.each([400, 401, 403, 404])('HTTP %i confirma o bloqueio', async (status) => {
+    expect(await checkEmbeddable('video000001', { fetch: respond(status) })).toBe('blocked');
+  });
+
+  it('5xx, 429 ou falha de rede não confirmam nada', async () => {
+    expect(await checkEmbeddable('video000001', { fetch: respond(503) })).toBe('unknown');
+    expect(await checkEmbeddable('video000001', { fetch: respond(429) })).toBe('unknown');
+    const offline = vi.fn(async () => {
+      throw new TypeError('fetch failed');
+    });
+    expect(await checkEmbeddable('video000001', { fetch: offline })).toBe('unknown');
   });
 });

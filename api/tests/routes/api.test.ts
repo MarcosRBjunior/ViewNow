@@ -27,6 +27,9 @@ function setup() {
     upsertMany: vi.fn(),
     removeMissing: vi.fn(),
     logSyncRun: vi.fn(),
+    recordPlaybackReport: vi.fn().mockResolvedValue({ isNew: true, reporters: 1, hidden: false }),
+    markUnplayable: vi.fn().mockResolvedValue(undefined),
+    clearStaleUnplayable: vi.fn(),
     ping: vi.fn().mockResolvedValue(true),
   } satisfies VideosRepository;
 
@@ -34,8 +37,10 @@ function setup() {
     .fn()
     .mockResolvedValue({ status: 'success', videosFetched: 20, removed: 1, durationMs: 1200 });
 
-  const app = createApp({ repository, runSync, cronSecret: SECRET });
-  return { app, repository, runSync };
+  const checkEmbed = vi.fn().mockResolvedValue('playable');
+
+  const app = createApp({ repository, runSync, cronSecret: SECRET, checkEmbed });
+  return { app, repository, runSync, checkEmbed };
 }
 
 let ctx: ReturnType<typeof setup>;
@@ -158,6 +163,84 @@ describe('GET /api/videos/:id/embed', () => {
   it('404 para vídeo inexistente', async () => {
     const res = await request(ctx.app).get('/api/videos/inexistente/embed');
     expect(res.status).toBe(404);
+  });
+});
+
+describe('POST /api/videos/:id/report', () => {
+  const report = (id: string, body: object, ip = '203.0.113.7') =>
+    request(ctx.app).post(`/api/videos/${id}/report`).set('X-Forwarded-For', ip).send(body);
+
+  it('registra o relato com hash do IP, sem esconder quando o YouTube diz que toca', async () => {
+    const res = await report('video000001', { code: 150 });
+
+    expect(res.status).toBe(202);
+    expect(res.body).toEqual({ data: { hidden: false } });
+    expect(res.headers['cache-control']).toBe('no-store');
+    const [youtubeId, hash, code] = ctx.repository.recordPlaybackReport.mock.calls[0]!;
+    expect([youtubeId, code]).toEqual(['video000001', 150]);
+    expect(hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(hash).not.toContain('203.0.113.7');
+    expect(ctx.checkEmbed).toHaveBeenCalledWith('video000001');
+    expect(ctx.repository.markUnplayable).not.toHaveBeenCalled();
+  });
+
+  it('o mesmo IP gera o mesmo hash; IPs diferentes, hashes diferentes', async () => {
+    await report('video000001', { code: 101 }, '198.51.100.1');
+    await report('video000001', { code: 101 }, '198.51.100.1');
+    await report('video000001', { code: 101 }, '198.51.100.2');
+    const hashes = ctx.repository.recordPlaybackReport.mock.calls.map((call) => call[1]);
+    expect(hashes[0]).toBe(hashes[1]);
+    expect(hashes[0]).not.toBe(hashes[2]);
+  });
+
+  it('esconde na hora quando o oEmbed confirma o bloqueio', async () => {
+    ctx.checkEmbed.mockResolvedValue('blocked');
+    const res = await report('video000001', { code: 101 });
+
+    expect(res.body).toEqual({ data: { hidden: true } });
+    expect(ctx.repository.markUnplayable).toHaveBeenCalledWith('video000001');
+  });
+
+  it('não reconsulta o YouTube em relato repetido do mesmo visitante', async () => {
+    ctx.repository.recordPlaybackReport.mockResolvedValue({
+      isNew: false,
+      reporters: 1,
+      hidden: false,
+    });
+    await report('video000001', { code: 150 });
+    expect(ctx.checkEmbed).not.toHaveBeenCalled();
+  });
+
+  it('não consulta o YouTube quando o banco já escondeu pelo limite de relatos', async () => {
+    ctx.repository.recordPlaybackReport.mockResolvedValue({
+      isNew: true,
+      reporters: 3,
+      hidden: true,
+    });
+    const res = await report('video000001', { code: 150 });
+    expect(res.body).toEqual({ data: { hidden: true } });
+    expect(ctx.checkEmbed).not.toHaveBeenCalled();
+  });
+
+  it('aceita o uuid interno e relata pelo youtube_id', async () => {
+    await report(video(1).id, { code: 100 });
+    expect(ctx.repository.recordPlaybackReport.mock.calls[0]![0]).toBe('video000001');
+  });
+
+  it.each([[{ code: 2 }], [{ code: '150' }], [{}], [{ code: 5 }]])(
+    'rejeita código de erro inválido %j',
+    async (body) => {
+      const res = await report('video000001', body);
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('VALIDATION_ERROR');
+      expect(ctx.repository.recordPlaybackReport).not.toHaveBeenCalled();
+    },
+  );
+
+  it('404 para vídeo inexistente ou já escondido, sem registrar nada', async () => {
+    const res = await report('naoexiste01', { code: 150 });
+    expect(res.status).toBe(404);
+    expect(ctx.repository.recordPlaybackReport).not.toHaveBeenCalled();
   });
 });
 

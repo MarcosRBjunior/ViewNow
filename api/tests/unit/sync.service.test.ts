@@ -22,6 +22,9 @@ function fakeRepository() {
     upsertMany: vi.fn().mockResolvedValue(undefined),
     removeMissing: vi.fn().mockResolvedValue(1),
     logSyncRun: vi.fn().mockResolvedValue(undefined),
+    recordPlaybackReport: vi.fn(),
+    markUnplayable: vi.fn(),
+    clearStaleUnplayable: vi.fn().mockResolvedValue(0),
     ping: vi.fn(),
   } satisfies VideosRepository;
 }
@@ -42,6 +45,7 @@ describe('runSync', () => {
 
     expect(result).toMatchObject({ status: 'success', videosFetched: 2, removed: 1 });
     expect(repository.upsertMany).toHaveBeenCalledWith(videos);
+    expect(repository.clearStaleUnplayable).toHaveBeenCalledOnce();
     expect(repository.removeMissing).toHaveBeenCalledWith('PLtest', ['video000001', 'video000003']);
     expect(repository.logSyncRun).toHaveBeenCalledWith(
       expect.objectContaining({
