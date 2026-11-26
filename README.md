@@ -14,7 +14,7 @@ Case full-stack com front e back desacoplados.
 | [`supabase/`](./supabase) | Migrations SQL (schema, RLS, funções) | PostgreSQL |
 | [`docs/`](./docs) | Especificação, arquitetura e system design | — |
 
-> Status: **Etapa 6 — Deploy**. Veja o roadmap em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
+> Status: **concluído, [v1.0.0](https://github.com/MarcosRBjunior/ViewNow/releases/tag/v1.0.0)**. As 6 etapas do roadmap estão em [docs/specs.md](./docs/specs.md#9-marcos-roadmap).
 
 ## Como rodar localmente
 
